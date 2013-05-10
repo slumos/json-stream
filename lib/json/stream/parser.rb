@@ -19,9 +19,13 @@ module JSON
       TRUE_RE       = /[rue]/
       FALSE_RE      = /[alse]/
       NULL_RE       = /[ul]/
+      INFINITY_RE   = /[nfinity]/
+      NAN_RE        = /[nN]/
       TRUE_KEYWORD  = 'true'
       FALSE_KEYWORD = 'false'
       NULL_KEYWORD  = 'null'
+      INFINITY_KEYWORD = 'Infinity'
+      NAN_KEYWORD   = 'NaN'
       LEFT_BRACE    = '{'
       RIGHT_BRACE   = '}'
       LEFT_BRACKET  = '['
@@ -35,8 +39,11 @@ module JSON
       MINUS         = '-'
       PLUS          = '+'
       POINT         = '.'
+      NAN           = 0.0/0.0
+      INFINITY      = 1.0/0.0
       EXPONENT      = /[eE]/
       B,F,N,R,T,U   = %w[b f n r t u]
+      UPPER_I,UPPER_N = %w[I,N]
 
       # Parses a full JSON document from a String or an IO stream and returns
       # the parsed object graph. For parsing small JSON documents with small
@@ -298,6 +305,10 @@ module JSON
             keyword(FALSE_KEYWORD, false, FALSE_RE, ch)
           when :start_null
             keyword(NULL_KEYWORD, nil, NULL_RE, ch)
+          when :start_nan
+            keyword(NAN_KEYWORD, NAN, NAN_RE, ch)
+          when :start_infinity
+            keyword(INFINITY_KEYWORD, INFINITY, INFINITY_RE, ch)
           when :end_key
             case ch
             when COLON
@@ -404,6 +415,12 @@ module JSON
           @buf << ch
         when N
           @state = :start_null
+          @buf << ch
+        when UPPER_I
+          @state = :start_infinity
+          @buf << ch
+        when UPPER_N
+          @state = :start_nan
           @buf << ch
         when MINUS
           @state = :start_negative_number
