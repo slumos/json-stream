@@ -25,6 +25,7 @@ module JSON
       FALSE_KEYWORD = 'false'
       NULL_KEYWORD  = 'null'
       INFINITY_KEYWORD = 'Infinity'
+      NEGATIVE_INFINITY_KEYWORD = '-Infinity'
       NAN_KEYWORD   = 'NaN'
       LEFT_BRACE    = '{'
       RIGHT_BRACE   = '}'
@@ -41,6 +42,7 @@ module JSON
       POINT         = '.'
       NAN           = 0.0/0.0
       INFINITY      = 1.0/0.0
+      NEGATIVE_INFINITY = -1.0/0.0
       EXPONENT      = /[eE]/
       B,F,N,R,T,U   = %w[b f n r t u]
       UPPER_I,UPPER_N = %w[I N]
@@ -222,7 +224,7 @@ module JSON
               @state = :start_int
               @buf << ch
             when UPPER_I
-              @state = :start_infinity
+              @state = :start_negative_infinity
               @buf << ch
             else
               error('Expected 0-9 digit')
@@ -312,6 +314,8 @@ module JSON
             keyword(NAN_KEYWORD, NAN, NAN_RE, ch)
           when :start_infinity
             keyword(INFINITY_KEYWORD, INFINITY, INFINITY_RE, ch)
+          when :start_negative_infinity
+            keyword(NEGATIVE_INFINITY_KEYWORD, NEGATIVE_INFINITY, INFINITY_RE, ch)  
           when :end_key
             case ch
             when COLON
