@@ -20,7 +20,7 @@ module JSON
       FALSE_RE      = /[alse]/
       NULL_RE       = /[ul]/
       INFINITY_RE   = /[nfinity]/
-      NAN_RE        = /[nN]/
+      NAN_RE        = /[aN]/
       TRUE_KEYWORD  = 'true'
       FALSE_KEYWORD = 'false'
       NULL_KEYWORD  = 'null'
@@ -43,7 +43,7 @@ module JSON
       INFINITY      = 1.0/0.0
       EXPONENT      = /[eE]/
       B,F,N,R,T,U   = %w[b f n r t u]
-      UPPER_I,UPPER_N = %w[I,N]
+      UPPER_I,UPPER_N = %w[I N]
 
       # Parses a full JSON document from a String or an IO stream and returns
       # the parsed object graph. For parsing small JSON documents with small
@@ -221,6 +221,9 @@ module JSON
             when DIGIT_1_9
               @state = :start_int
               @buf << ch
+            when UPPER_I
+              @state = :start_infinity
+              @buf << ch
             else
               error('Expected 0-9 digit')
             end
@@ -381,7 +384,7 @@ module JSON
         if ch =~ re
           @buf << ch
         else
-          error("Expected #{word} keyword")
+          error("Expected #{word} keyword. Found #{@buf}")
         end
         if @buf.size == word.size
           if @buf == word
@@ -389,7 +392,7 @@ module JSON
             @buf = ""
             notify_value(value)
           else
-            error("Expected #{word} keyword")
+            error("Expected #{word} keyword. Found #{@buf}")
           end
         end
       end
